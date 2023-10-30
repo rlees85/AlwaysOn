@@ -2,6 +2,7 @@ package io.github.domi04151309.alwayson.services
 
 import android.app.Notification
 import android.content.*
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
@@ -83,10 +84,18 @@ class NotificationService : NotificationListenerService() {
                         if (notification.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0) count++
                         if (!apps.contains(notification.packageName)) {
                             apps += notification.packageName
+
+                            var color: Int
+                            color = notification.notification.color
+
+                            if ((Color.red(color) <= 100) and (Color.green(color) <= 100) and (Color.blue(color) <= 100)) {
+                                color = Color.WHITE
+                            }
+
                             icons.add(
                                 Pair(
                                     notification.notification.smallIcon,
-                                    notification.notification.color
+                                    color
                                 )
                             )
                         }
