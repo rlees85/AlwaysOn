@@ -16,6 +16,9 @@ import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
 import io.github.domi04151309.alwayson.receivers.CombinedServiceReceiver
 import org.json.JSONArray
+import java.lang.Math.round
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 class NotificationService : NotificationListenerService() {
 
@@ -85,11 +88,20 @@ class NotificationService : NotificationListenerService() {
                         if (!apps.contains(notification.packageName)) {
                             apps += notification.packageName
 
-                            var color: Int
-                            color = notification.notification.color
+                            var color: Int = notification.notification.color
 
-                            if ((Color.red(color) <= 100) and (Color.green(color) <= 100) and (Color.blue(color) <= 100)) {
-                                color = Color.WHITE
+                            color = if (color == Color.BLACK) {
+                                Color.WHITE
+                            } else {
+                                var oldRed: Int = Color.red(color)
+                                var oldGreen: Int = Color.green(color)
+                                var oldBlue: Int = Color.blue(color)
+                                var rgbMax: Int = max(oldRed, oldGreen, oldBlue)
+                                var rgbFactor: Float = 255 / rgbMax.toFloat()
+                                var newRed: Int = min(255, (oldRed * rgbFactor).roundToInt())
+                                var newGreen: Int = min(255, (oldGreen * rgbFactor).roundToLong())
+                                var newBlue: Int = min(255, (oldBlue * rgbFactor).roundToInt())
+                                Color.rgb(newRed, newGreen, newBlue)
                             }
 
                             icons.add(
