@@ -16,9 +16,7 @@ import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
 import io.github.domi04151309.alwayson.receivers.CombinedServiceReceiver
 import org.json.JSONArray
-import java.lang.Math.round
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 class NotificationService : NotificationListenerService() {
 
@@ -93,14 +91,14 @@ class NotificationService : NotificationListenerService() {
                             color = if (color == Color.BLACK) {
                                 Color.WHITE
                             } else {
-                                var oldRed: Int = Color.red(color)
-                                var oldGreen: Int = Color.green(color)
-                                var oldBlue: Int = Color.blue(color)
-                                var rgbMax: Int = max(oldRed, oldGreen, oldBlue)
-                                var rgbFactor: Float = 255 / rgbMax.toFloat()
-                                var newRed: Int = min(255, (oldRed * rgbFactor).roundToInt())
-                                var newGreen: Int = min(255, (oldGreen * rgbFactor).roundToLong())
-                                var newBlue: Int = min(255, (oldBlue * rgbFactor).roundToInt())
+                                val oldRed: Int = Color.red(color)
+                                val oldGreen: Int = Color.green(color)
+                                val oldBlue: Int = Color.blue(color)
+                                val rgbMax: Int = maxOf(oldRed, oldGreen, oldBlue)
+                                val rgbFactor: Float = 255 / rgbMax.toFloat()
+                                val newRed: Int = minOf(255, (oldRed * rgbFactor).roundToInt())
+                                val newGreen: Int = minOf(255, (oldGreen * rgbFactor).roundToInt())
+                                val newBlue: Int = minOf(255, (oldBlue * rgbFactor).roundToInt())
                                 Color.rgb(newRed, newGreen, newBlue)
                             }
 
