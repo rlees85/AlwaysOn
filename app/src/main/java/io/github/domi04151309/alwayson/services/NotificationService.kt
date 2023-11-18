@@ -88,17 +88,18 @@ class NotificationService : NotificationListenerService() {
 
                             var color: Int = notification.notification.color
 
-                            color = if (color == Color.BLACK) {
+                            val colorRed: Int = Color.red(color)
+                            val colorGreen: Int = Color.green(color)
+                            val colorBlue: Int = Color.blue(color)
+
+                            color = if ((colorRed < 1) && (colorGreen < 1) && (colorBlue < 1)) {
                                 Color.WHITE
                             } else {
-                                val oldRed: Int = Color.red(color)
-                                val oldGreen: Int = Color.green(color)
-                                val oldBlue: Int = Color.blue(color)
-                                val rgbMax: Int = maxOf(oldRed, oldGreen, oldBlue)
+                                val rgbMax: Int = maxOf(colorRed, colorGreen, colorBlue)
                                 val rgbFactor: Float = 255 / rgbMax.toFloat()
-                                val newRed: Int = minOf(255, (oldRed * rgbFactor).roundToInt())
-                                val newGreen: Int = minOf(255, (oldGreen * rgbFactor).roundToInt())
-                                val newBlue: Int = minOf(255, (oldBlue * rgbFactor).roundToInt())
+                                val newRed: Int = minOf(255, (colorRed * rgbFactor).roundToInt())
+                                val newGreen: Int = minOf(255, (colorGreen * rgbFactor).roundToInt())
+                                val newBlue: Int = minOf(255, (colorBlue * rgbFactor).roundToInt())
                                 Color.rgb(newRed, newGreen, newBlue)
                             }
 
