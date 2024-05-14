@@ -5,7 +5,6 @@
     <string name="service_text">AlwaysOn is running in the background</string>
     <string name="service_channel">Service channel</string>
 
-    <string name="setup_header">Setup</string>
     <string name="setup_root_failed">Root request failed! Please try again or switch mode!</string>
     <string name="device_admin">Device Admin</string>
     <string name="device_admin_summary">You need to activate this device admin or switch to root mode for this app to work.</string>
@@ -21,7 +20,7 @@
     <string name="setup_continue">Continue</string>
     <string name="setup_error">Something went wrong! Please try again!</string>
 
-    <string name="dialog_device_admin_text">Please note that you have to deactivate the app\'s device admin privileges before uninstalling it! To make sure you understood this please perform the following operation:\n7 + 12</string>
+    <string name="dialog_device_admin_text">Please note that you have to deactivate the app\’s device admin privileges before uninstalling it! To make sure you understood this please perform the following operation:\n7 + 12</string>
     <string name="dialog_device_admin_result">Result</string>
     <string name="dialog_device_admin_error">Wrong result. Try again.</string>
 
@@ -56,8 +55,6 @@
     <string name="pref_ao_behavior_summary">Settings related to the behavior of the app</string>
     <string name="pref_ao_other">Other settings</string>
 
-    <string name="pref_look_and_feel_dark">Dark mode</string>
-    <string name="pref_look_and_feel_dark_summary">Changes the look of the app to a dark style</string>
     <string name="pref_look_and_feel_hour">Use 12-hour clock</string>
     <string name="pref_look_and_feel_hour_summary_on">Currently used: 12-hour clock</string>
     <string name="pref_look_and_feel_hour_summary_off">Currently used: 24-hour clock</string>
@@ -127,7 +124,7 @@
     <string name="pref_ao_dnd">Do not disturb</string>
     <string name="pref_ao_dnd_summary">Turns on do not disturb mode while the always on display is running</string>
     <string name="pref_ao_power_saving">Power saving mode (root)</string>
-    <string name="pref_ao_power_saving_summary">Turns on the system\'s power saver mode when the always on display is enabled</string>
+    <string name="pref_ao_power_saving_summary">Turns on the system\’s power saver mode when the always on display is enabled</string>
     <string name="pref_ao_double_tap_speed">Double-tap speed</string>
     <string name="pref_ao_double_tap_speed_summary">The time two taps can be apart (in milliseconds)</string>
     <string name="pref_ao_double_tap_disabled">Disable double-tap</string>
@@ -171,7 +168,7 @@
     <string name="pref_look_and_feel_hide_display_cutouts">Hide display cutouts</string>
     <string name="pref_look_and_feel_hide_display_cutouts_summary">Hide display cutouts on fullscreen content</string>
     <string name="pref_look_and_feel_orientation">Orientation</string>
-    <string name="pref_look_and_feel_orientation_summary">Changes the display\'s orientation</string>
+    <string name="pref_look_and_feel_orientation_summary">Changes the display\’s orientation</string>
     <string name="pref_look_and_feel_heads_up">Hide heads up notifications (root)</string>
     <string name="pref_look_and_feel_heads_up_summary">Prevents the heads up notifications from showing (experimental)</string>
 
@@ -224,7 +221,7 @@
     <string name="pref_draw_over_other_apps">Display over other apps</string>
     <string name="pref_draw_over_other_apps_summary">Enable or disable this permission</string>
     <string name="pref_admin">Device admin</string>
-    <string name="pref_admin_summary">Activate this device admin for normal mode\nPlease note that you have to deactivate the app\'s device admin privileges before uninstalling it!</string>
+    <string name="pref_admin_summary">Activate this device admin for normal mode\nPlease note that you have to deactivate the app\’s device admin privileges before uninstalling it!</string>
     <string name="pref_root_mode">Root mode</string>
     <string name="pref_root_mode_summary">Enables root functionality</string>
 
@@ -251,7 +248,7 @@
     <string name="about_app_version">App version</string>
     <string name="about_app_version_desc" translatable="false">%1$s (%2$d)</string>
     <string name="about_privacy">External Content</string>
-    <string name="about_privacy_desc">Contributors are loaded from GitHub. Read their privacy policy for further information.</string>
+    <string name="about_privacy_desc">External content will be loaded from GitHub. Read their privacy policy for further information.</string>
     <string name="about_privacy_policy">Privacy Policy</string>
     <string name="about_contributors">Contributors</string>
     <string name="about_contributors_desc">A list of the contributors</string>
@@ -265,12 +262,18 @@
     <string name="about_libraries_desc">A list of all used libraries</string>
 
     <string-array name="about_libraries" translatable="false">
-        <item>Android AppCompat Library</item>
         <item>Android Preferences KTX</item>
-        <item>Android Support CardView V7</item>
-        <item>Android Support RecyclerView</item>
+        <item>AppCompat</item>
         <item>ColorPicker</item>
+        <item>Material Components For Android</item>
         <item>Volley</item>
+    </string-array>
+    <string-array name="about_libraries_licenses" translatable="false">
+        <item>Apache 2.0</item>
+        <item>Apache 2.0</item>
+        <item>Apache 2.0</item>
+        <item>Apache 2.0</item>
+        <item>Apache 2.0</item>
     </string-array>
 
     <string-array name="pref_look_and_feel_rules_charging_state_display">

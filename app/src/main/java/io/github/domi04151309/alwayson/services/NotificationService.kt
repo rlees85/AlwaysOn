@@ -1,8 +1,12 @@
 package io.github.domi04151309.alwayson.services
 
 import android.app.Notification
+<<<<<<< HEAD
 import android.content.*
 import android.graphics.Color
+=======
+import android.content.Intent
+>>>>>>> master
 import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
@@ -11,124 +15,127 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.preference.PreferenceManager
 import io.github.domi04151309.alwayson.actions.alwayson.AlwaysOn
-import io.github.domi04151309.alwayson.helpers.Rules
 import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
+import io.github.domi04151309.alwayson.helpers.Rules
 import io.github.domi04151309.alwayson.receivers.CombinedServiceReceiver
 import org.json.JSONArray
 import kotlin.math.roundToInt
 
 class NotificationService : NotificationListenerService() {
-
-    private lateinit var prefs: SharedPreferences
     private var sentRecently: Boolean = false
-    private var cache: Int = -1
+    private var previousCount: Int = -1
 
     interface OnNotificationsChangedListener {
         fun onNotificationsChanged()
     }
 
-    companion object {
-        internal var count: Int = 0; private set
-        internal var icons: ArrayList<Pair<Icon, Int>> = arrayListOf(); private set
-        internal var detailed: Array<StatusBarNotification> = arrayOf(); private set
-
-        @JvmField
-        internal val listeners: ArrayList<OnNotificationsChangedListener> = arrayListOf()
-    }
-
     override fun onCreate() {
         super.onCreate()
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        updateVars()
+        updateValues()
     }
 
-    override fun onNotificationPosted(sbn: StatusBarNotification) {
-        updateVars()
+    override fun onNotificationPosted(notification: StatusBarNotification) {
+        updateValues()
 
-        val rules = Rules(this, prefs)
+        val rules = Rules(this)
+        @Suppress("ComplexCondition")
         if (
-            isValidNotification(sbn)
-            && !CombinedServiceReceiver.isScreenOn
-            && !CombinedServiceReceiver.isAlwaysOnRunning
-            && rules.isAlwaysOnDisplayEnabled()
-            && rules.isAmbientMode()
-            && rules.matchesChargingState()
-            && rules.matchesBatteryPercentage()
-            && rules.isInTimePeriod()
+            isValidNotification(notification) &&
+            !CombinedServiceReceiver.isScreenOn &&
+            !CombinedServiceReceiver.isAlwaysOnRunning &&
+            Rules.isAmbientMode(this) &&
+            rules.canShow(this)
         ) {
             startActivity(
                 Intent(
                     this,
-                    AlwaysOn::class.java
-                ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    AlwaysOn::class.java,
+                ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             )
         }
     }
 
-    override fun onNotificationRemoved(sbn: StatusBarNotification) {
-        updateVars()
+    override fun onNotificationRemoved(notification: StatusBarNotification) {
+        updateValues()
     }
 
-    private fun updateVars() {
-        if (!sentRecently) {
-            sentRecently = true
-            val apps: ArrayList<String>
-            icons = arrayListOf()
+    private fun updateValues() {
+        if (sentRecently) return
+
+        sentRecently = true
+        try t {
+            val apps = ArrayList<String>(detailed.size)
+            detailed = activeNotifications
+            icons = ArrayList(detailed.size)
             count = 0
-            try {
-                detailed = activeNotifications
-                apps = ArrayList(detailed.size)
-                icons = ArrayList(detailed.size)
-                for (notification in detailed) {
-                    if (isValidNotification(notification)) {
-                        if (notification.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0) count++
-                        if (!apps.contains(notification.packageName)) {
-                            apps += notification.packageName
-
-                            var color: Int = notification.notification.color
-
-                            val colorRed: Int = Color.red(color)
-                            val colorGreen: Int = Color.green(color)
-                            val colorBlue: Int = Color.blue(color)
-
-                            color = if ((colorRed < 1) && (colorGreen < 1) && (colorBlue < 1)) {
-                                Color.WHITE
-                            } else {
-                                val rgbMax: Int = maxOf(colorRed, colorGreen, colorBlue)
-                                val rgbFactor: Float = 255 / rgbMax.toFloat()
-                                val newRed: Int = minOf(255, (colorRed * rgbFactor).roundToInt())
-                                val newGreen: Int = minOf(255, (colorGreen * rgbFactor).roundToInt())
-                                val newBlue: Int = minOf(255, (colorBlue * rgbFactor).roundToInt())
-                                Color.rgb(newRed, newGreen, newBlue)
-                            }
-
-                            icons.add(
-                                Pair(
-                                    notification.notification.smallIcon,
-                                    color
-                                )
-                            )
-                        }
-                    }
+            for (notification in detailed) {
+                if (!isValidNotification(notification)) continue
+                if (
+                    notification.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
+                ) {
+                    count++
                 }
-            } catch (e: Exception) {
-                Log.e(Global.LOG_TAG, e.toString())
-                count = 0
-                icons = arrayListOf()
+                if (!apps.contains(notification.packageName)) {
+                    apps += notification.packageName
+
+                    var color: Int = notification.notification.color
+
+                    val colorRed: Int = Color.red(color)
+                    val colorGreen: Int = Color.green(color)
+                    val colorBlue: Int = Color.blue(color)
+
+                    color = if ((colorRed < 1) && (colorGreen < 1) && (colorBlue < 1)) {
+                        Color.WHITE
+                    } else {
+                        val rgbMax: Int = maxOf(colorRed, colorGreen, colorBlue)
+                        val rgbFactor: Float = 255 / rgbMax.toFloat()
+                        val newRed: Int = minOf(255, (colorRed * rgbFactor).roundToInt())
+                        val newGreen: Int = minOf(255, (colorGreen * rgbFactor).roundToInt())
+                        val newBlue: Int = minOf(255, (colorBlue * rgbFactor).roundToInt())
+                        Color.rgb(newRed, newGreen, newBlue)
+                    }
+
+                    icons.add(
+                        Pair(
+                            notification.notification.smallIcon,
+                            color,
+                        ),
+                    )
+                }
             }
-            if (cache != count) {
-                cache = count
-                listeners.forEach { it.onNotificationsChanged() }
-            }
-            Handler(Looper.getMainLooper()).postDelayed({ sentRecently = false }, 500)
+        } catch (exception: SecurityException) {
+            Log.e(Global.LOG_TAG, exception.toString())
+            count = 0
+            icons = arrayListOf()
         }
+        if (previousCount != count) {
+            previousCount = count
+            listeners.forEach { it.onNotificationsChanged() }
+        }
+        Handler(Looper.getMainLooper()).postDelayed({ sentRecently = false }, MINIMUM_UPDATE_DELAY)
     }
 
-    private fun isValidNotification(notification: StatusBarNotification): Boolean {
-        return !notification.isOngoing && !JSON.contains(
-            JSONArray(prefs.getString("blocked_notifications", "[]")),
-            notification.packageName
-        )
+    private fun isValidNotification(notification: StatusBarNotification): Boolean =
+        !notification.isOngoing &&
+            !JSON.contains(
+                JSONArray(
+                    PreferenceManager.getDefaultSharedPreferences(this)
+                        .getString("blocked_notifications", "[]"),
+                ),
+                notification.packageName,
+            )
+
+    companion object {
+        const val MINIMUM_UPDATE_DELAY: Long = 1000
+        internal var count: Int = 0
+            private set
+        internal var icons: ArrayList<Pair<Icon, Int>> = arrayListOf()
+            private set
+        internal var detailed: Array<StatusBarNotification> = arrayOf()
+            private set
+
+        @JvmField
+        internal val listeners: ArrayList<OnNotificationsChangedListener> = arrayListOf()
     }
 }

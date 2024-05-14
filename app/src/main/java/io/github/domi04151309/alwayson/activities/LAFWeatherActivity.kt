@@ -1,23 +1,17 @@
 package io.github.domi04151309.alwayson.activities
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.domi04151309.alwayson.R
-import io.github.domi04151309.alwayson.actions.alwayson.AlwaysOn
+import io.github.domi04151309.alwayson.custom.BasePreferenceFragment
 import io.github.domi04151309.alwayson.helpers.P
-import io.github.domi04151309.alwayson.helpers.Theme
 
-class LAFWeatherActivity : AppCompatActivity() {
-
+class LAFWeatherActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        Theme.set(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         supportFragmentManager
@@ -26,10 +20,13 @@ class LAFWeatherActivity : AppCompatActivity() {
             .commit()
     }
 
-    class PreferenceFragment : PreferenceFragmentCompat(),
-        SharedPreferences.OnSharedPreferenceChangeListener {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    class PreferenceFragment : BasePreferenceFragment() {
+        override fun onCreatePreferences(
+            savedInstanceState: Bundle?,
+            rootKey: String?,
+        ) {
             addPreferencesFromResource(R.xml.pref_laf_wf_weather)
+            checkPermissions()
 
             findPreference<Preference>(P.WEATHER_FORMAT)?.setOnPreferenceClickListener {
                 val dialogView = layoutInflater.inflate(R.layout.dialog_edit_text, null, false)
@@ -37,15 +34,16 @@ class LAFWeatherActivity : AppCompatActivity() {
                 editText.setText(
                     preferenceManager.sharedPreferences?.getString(
                         P.WEATHER_FORMAT,
-                        P.WEATHER_FORMAT_DEFAULT
-                    )
+                        P.WEATHER_FORMAT_DEFAULT,
+                    ),
                 )
-                AlertDialog.Builder(requireContext())
+                MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.pref_look_and_feel_weather_format)
                     .setView(dialogView)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         preferenceManager.sharedPreferences?.edit()
-                            ?.putString(P.WEATHER_FORMAT, editText.text.toString())?.apply()
+                            ?.putString(P.WEATHER_FORMAT, editText.text.toString())
+                            ?.apply()
                     }
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .setNeutralButton(R.string.pref_ao_date_format_dialog_neutral) { _, _ ->
@@ -53,16 +51,16 @@ class LAFWeatherActivity : AppCompatActivity() {
                             Intent(Intent.ACTION_VIEW)
                                 .setData(
                                     Uri.parse(
-                                        "https://github.com/chubin/wttr.in#one-line-output"
-                                    )
-                                )
+                                        "https://github.com/chubin/wttr.in#one-line-output",
+                                    ),
+                                ),
                         )
                     }
                     .show()
                 true
             }
 
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.about_privacy)
                 .setMessage(R.string.pref_look_and_feel_weather_provider)
                 .setPositiveButton(android.R.string.ok) { _, _ -> }
@@ -72,27 +70,14 @@ class LAFWeatherActivity : AppCompatActivity() {
                 .setNeutralButton(R.string.pref_look_and_feel_weather_provider_name) { _, _ ->
                     startActivity(
                         Intent(
-                            Intent.ACTION_VIEW, Uri.parse(
-                                "https://github.com/chubin/wttr.in"
-                            )
-                        )
+                            Intent.ACTION_VIEW,
+                            Uri.parse(
+                                "https://github.com/chubin/wttr.in",
+                            ),
+                        ),
                     )
                 }
                 .show()
-        }
-
-        override fun onStart() {
-            super.onStart()
-            preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
-        }
-
-        override fun onStop() {
-            super.onStop()
-            preferenceManager.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
-        }
-
-        override fun onSharedPreferenceChanged(p0: SharedPreferences?, p1: String?) {
-            AlwaysOn.finish()
         }
     }
 }

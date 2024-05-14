@@ -3,22 +3,19 @@ package io.github.domi04151309.alwayson.activities
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import io.github.domi04151309.alwayson.R
 import io.github.domi04151309.alwayson.actions.alwayson.AlwaysOn
+import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
-import io.github.domi04151309.alwayson.helpers.Theme
 import io.github.domi04151309.alwayson.services.NotificationService
 import org.json.JSONArray
-import java.lang.Exception
 
-class LAFFilterNotificationsActivity : AppCompatActivity() {
-
+class LAFFilterNotificationsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        Theme.set(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         supportFragmentManager
@@ -28,37 +25,30 @@ class LAFFilterNotificationsActivity : AppCompatActivity() {
     }
 
     class PreferenceFragment : PreferenceFragmentCompat() {
-
         private var blockedArray: JSONArray = JSONArray()
         private lateinit var blocked: PreferenceCategory
         private lateinit var shown: PreferenceCategory
-        private lateinit var packageManager: PackageManager
-        private lateinit var empty: Preference
 
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        override fun onCreatePreferences(
+            savedInstanceState: Bundle?,
+            rootKey: String?,
+        ) {
             addPreferencesFromResource(R.xml.pref_laf_wf_filter_notifications)
-            blocked = findPreference("blocked") ?: return
-            shown = findPreference("shown") ?: return
-            packageManager = requireContext().packageManager
-            empty = Preference(preferenceScreen.context)
-            empty.setIcon(R.drawable.ic_notification)
-            empty.title = requireContext().resources.getString(
-                R.string.pref_look_and_feel_filter_notifications_empty
-            )
-            empty.summary = requireContext().resources.getString(
-                R.string.pref_look_and_feel_filter_notifications_empty_summary
-            )
+            blocked = findPreference("blocked") ?: error("Invalid layout.")
+            shown = findPreference("shown") ?: error("Invalid layout.")
         }
 
         override fun onStart() {
             super.onStart()
-            blockedArray = JSONArray(
-                preferenceManager.sharedPreferences?.getString("blocked_notifications", "[]")
-            )
+            val packageManager = requireContext().packageManager
+            blockedArray =
+                JSONArray(
+                    preferenceManager.sharedPreferences?.getString("blocked_notifications", "[]"),
+                )
             if (!JSON.isEmpty(blockedArray)) {
                 blocked.removeAll()
                 for (i in 0 until blockedArray.length()) {
-                    addToList(blockedArray.getString(i))
+                    addToList(packageManager, blockedArray.getString(i))
                 }
             }
 
@@ -68,10 +58,10 @@ class LAFFilterNotificationsActivity : AppCompatActivity() {
             NotificationService.detailed.forEach { notification ->
                 if (!apps.contains(notification.packageName)) {
                     apps += notification.packageName
-                    pref = generatePref(notification.packageName)
+                    pref = generatePref(packageManager, notification.packageName)
                     pref.setOnPreferenceClickListener {
                         if (!JSON.contains(blockedArray, notification.packageName)) {
-                            addToList(notification.packageName)
+                            addToList(packageManager, notification.packageName)
                             blockedArray.put(notification.packageName)
                         }
                         true
@@ -89,40 +79,64 @@ class LAFFilterNotificationsActivity : AppCompatActivity() {
             AlwaysOn.finish()
         }
 
-        private fun addToList(packageName: String) {
+        private fun addToList(
+            packageManager: PackageManager,
+            packageName: String,
+        ) {
             if (JSON.isEmpty(blockedArray)) blocked.removeAll()
-            val pref = generatePref(packageName)
+            val pref = generatePref(packageManager, packageName)
             pref.setOnPreferenceClickListener {
                 JSON.remove(blockedArray, packageName)
                 blocked.removePreference(it)
-                if (JSON.isEmpty(blockedArray)) blocked.addPreference(empty)
+                if (JSON.isEmpty(blockedArray)) {
+                    blocked.addPreference(
+                        Preference(preferenceScreen.context).apply {
+                            setIcon(R.drawable.ic_notification)
+                            title =
+                                requireContext().resources.getString(
+                                    R.string.pref_look_and_feel_filter_notifications_empty,
+                                )
+                            summary =
+                                requireContext().resources.getString(
+                                    R.string.pref_look_and_feel_filter_notifications_empty_summary,
+                                )
+                        },
+                    )
+                }
                 true
             }
             blocked.addPreference(pref)
         }
 
-        private fun generatePref(packageName: String): Preference {
+        private fun generatePref(
+            packageManager: PackageManager,
+            packageName: String,
+        ): Preference {
             val pref = Preference(preferenceScreen.context)
             pref.setIcon(R.drawable.ic_notification)
-            pref.title = try {
-                if (Build.VERSION.SDK_INT >= 33) {
-                    packageManager.getApplicationLabel(
-                        packageManager.getApplicationInfo(
-                            packageName,
-                            PackageManager.ApplicationInfoFlags.of(
-                                PackageManager.GET_META_DATA.toLong()
-                            )
+            pref.title =
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        packageManager.getApplicationLabel(
+                            packageManager.getApplicationInfo(
+                                packageName,
+                                PackageManager.ApplicationInfoFlags.of(
+                                    PackageManager.GET_META_DATA.toLong(),
+                                ),
+                            ),
                         )
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    packageManager.getApplicationLabel(
-                        packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-                    )
-                } as String
-            } catch (e: Exception) {
-                resources.getString(R.string.pref_look_and_feel_filter_notifications_unknown)
-            }
+                    } else {
+                        packageManager.getApplicationLabel(
+                            packageManager.getApplicationInfo(
+                                packageName,
+                                PackageManager.GET_META_DATA,
+                            ),
+                        )
+                    } as String
+                } catch (exception: PackageManager.NameNotFoundException) {
+                    Log.w(Global.LOG_TAG, exception.toString())
+                    resources.getString(R.string.pref_look_and_feel_filter_notifications_unknown)
+                }
             pref.summary = packageName
             return pref
         }

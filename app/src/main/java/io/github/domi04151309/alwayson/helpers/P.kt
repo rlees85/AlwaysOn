@@ -2,22 +2,96 @@
 
 package io.github.domi04151309.alwayson.helpers
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.view.ViewConfiguration
+import androidx.preference.PreferenceManager
+import io.github.domi04151309.alwayson.R
+import java.net.URLEncoder
 
-internal class P(val prefs: SharedPreferences) {
+internal class P(private val prefs: SharedPreferences) {
+    fun get(
+        key: String,
+        default: Boolean,
+    ): Boolean = prefs.getBoolean(key, default)
 
-    fun get(key: String, default: Boolean): Boolean = prefs.getBoolean(key, default)
-    fun get(key: String, default: String): String = prefs.getString(key, default) ?: default
-    fun get(key: String, default: Int): Int = prefs.getInt(key, default)
+    fun get(
+        key: String,
+        default: String,
+    ): String = prefs.getString(key, default) ?: default
 
-    fun displayScale(): Float = prefs.getInt("pref_aod_scale_2", 100) / 100F
+    fun get(
+        key: String,
+        default: Int,
+    ): Int = prefs.getInt(key, default)
+
+    fun displayScale(): Float = prefs.getInt("pref_aod_scale_2", DISPLAY_SCALE_DEFAULT) / NUMBER_TO_PERCENT
+
+    fun backgroundImage(): Int? =
+        when (get(BACKGROUND_IMAGE, BACKGROUND_IMAGE_DEFAULT)) {
+            BACKGROUND_IMAGE_DANIEL_OLAH_1 -> R.drawable.unsplash_daniel_olah_1
+            BACKGROUND_IMAGE_DANIEL_OLAH_2 -> R.drawable.unsplash_daniel_olah_2
+            BACKGROUND_IMAGE_DANIEL_OLAH_3 -> R.drawable.unsplash_daniel_olah_3
+            BACKGROUND_IMAGE_DANIEL_OLAH_4 -> R.drawable.unsplash_daniel_olah_4
+            BACKGROUND_IMAGE_DANIEL_OLAH_5 -> R.drawable.unsplash_daniel_olah_5
+            BACKGROUND_IMAGE_DANIEL_OLAH_6 -> R.drawable.unsplash_daniel_olah_6
+            BACKGROUND_IMAGE_DANIEL_OLAH_7 -> R.drawable.unsplash_daniel_olah_7
+            BACKGROUND_IMAGE_DANIEL_OLAH_8 -> R.drawable.unsplash_daniel_olah_8
+            BACKGROUND_IMAGE_FILIP_BAOTIC_1 -> R.drawable.unsplash_filip_baotic_1
+            BACKGROUND_IMAGE_TYLER_LASTOVICH_1 ->
+                R.drawable.unsplash_tyler_lastovich_1
+
+            BACKGROUND_IMAGE_TYLER_LASTOVICH_2 ->
+                R.drawable.unsplash_tyler_lastovich_2
+
+            BACKGROUND_IMAGE_TYLER_LASTOVICH_3 ->
+                R.drawable.unsplash_tyler_lastovich_3
+
+            else -> null
+        }
+
+    fun getSingleLineTimeFormat() =
+        if (get(USE_12_HOUR_CLOCK, USE_12_HOUR_CLOCK_DEFAULT)) {
+            if (get(SHOW_AM_PM, SHOW_AM_PM_DEFAULT)) {
+                "h:mm a"
+            } else {
+                "h:mm"
+            }
+        } else {
+            "H:mm"
+        }
+
+    fun getMultiLineTimeFormat(): String {
+        val singleLineFormat = getSingleLineTimeFormat()
+        return singleLineFormat[0] +
+            singleLineFormat
+                .replace(':', '\n')
+                .replace(' ', '\n')
+    }
+
+    fun getWeatherUrl(): String =
+        "https://wttr.in/" +
+            URLEncoder.encode(
+                get(
+                    WEATHER_LOCATION,
+                    WEATHER_LOCATION_DEFAULT,
+                ),
+                "utf-8",
+            ) + "?T&format=" +
+            URLEncoder.encode(
+                get(
+                    WEATHER_FORMAT,
+                    WEATHER_FORMAT_DEFAULT,
+                ),
+                "utf-8",
+            )
 
     companion object {
         const val RULES_CHARGING_STATE = "rules_charging_state"
         const val RULES_BATTERY = "rules_battery_level"
         const val RULES_TIMEOUT = "rules_timeout_sec"
 
+        const val ALWAYS_ON = "always_on"
         const val ROOT_MODE = "root_mode"
         const val POWER_SAVING_MODE = "ao_power_saving"
         const val USER_THEME = "ao_style"
@@ -59,6 +133,11 @@ internal class P(val prefs: SharedPreferences) {
         const val DISPLAY_COLOR_WEATHER = "display_color_weather"
         const val DISPLAY_COLOR_FINGERPRINT = "display_color_fingerprint"
         const val DISPLAY_COLOR_EDGE_GLOW = "display_color_edge_glow"
+        const val FORCE_BRIGHTNESS_VALUE = "ao_force_brightness_value"
+        const val VIBRATION_DURATION = "ao_vibration"
+        const val EDGE_GLOW_DURATION = "ao_glowDuration"
+        const val EDGE_GLOW_DELAY = "ao_glowDelay"
+        const val EDGE_GLOW_STYLE = "ao_glowStyle"
 
         const val CHARGING_STYLE = "charging_style"
 
@@ -98,10 +177,15 @@ internal class P(val prefs: SharedPreferences) {
         const val CHARGING_STYLE_FLASH = "flash"
         const val CHARGING_STYLE_IOS = "ios"
 
+        private const val EDGE_GLOW_STYLE_ALL = "all"
+        const val EDGE_GLOW_STYLE_VERTICAL = "vertical"
+        const val EDGE_GLOW_STYLE_HORIZONTAL = "horizontal"
+
         const val RULES_CHARGING_STATE_DEFAULT = "always"
         const val RULES_BATTERY_DEFAULT = 0
         const val RULES_TIMEOUT_DEFAULT = 0
 
+        const val ALWAYS_ON_DEFAULT = false
         const val ROOT_MODE_DEFAULT = false
         const val POWER_SAVING_MODE_DEFAULT = false
         const val USER_THEME_DEFAULT = USER_THEME_GOOGLE
@@ -141,9 +225,23 @@ internal class P(val prefs: SharedPreferences) {
         const val DISPLAY_COLOR_WEATHER_DEFAULT = -1
         const val DISPLAY_COLOR_FINGERPRINT_DEFAULT = -1
         const val DISPLAY_COLOR_EDGE_GLOW_DEFAULT = -1
+        const val FORCE_BRIGHTNESS_VALUE_DEFAULT = 50
+        const val VIBRATION_DURATION_DEFAULT = 64
+        const val EDGE_GLOW_DURATION_DEFAULT = 2000
+        const val EDGE_GLOW_DELAY_DEFAULT = 2000
 
         const val CHARGING_STYLE_DEFAULT = CHARGING_STYLE_CIRCLE
+        const val EDGE_GLOW_STYLE_DEFAULT = EDGE_GLOW_STYLE_ALL
 
         val DOUBLE_TAP_SPEED_DEFAULT = ViewConfiguration.getDoubleTapTimeout()
+
+        private const val DISPLAY_SCALE_DEFAULT = 100
+        private const val NUMBER_TO_PERCENT = 100f
+
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun getPreferences(context: Context): SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(
+                context,
+            )
     }
 }

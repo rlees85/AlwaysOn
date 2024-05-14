@@ -7,19 +7,19 @@ import android.util.TypedValue
 import android.widget.Toast
 import androidx.preference.EditTextPreference
 import io.github.domi04151309.alwayson.R
+import java.lang.NumberFormatException
 
 class EditIntegerPreference : EditTextPreference {
-
     constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        defStyleRes: Int
+        defStyleRes: Int,
     ) : super(
         context,
         attrs,
         defStyleAttr,
-        defStyleRes
+        defStyleRes,
     ) {
         setOnBindEditTextListener {
             it.inputType = InputType.TYPE_CLASS_NUMBER
@@ -30,11 +30,12 @@ class EditIntegerPreference : EditTextPreference {
         context,
         attrs,
         defStyleAttr,
-        0
+        0,
     )
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, getAttr(context))
 
+    @Suppress("unused")
     constructor(context: Context) : this(context, null)
 
     override fun getPersistedString(defaultReturnValue: String?): String {
@@ -47,7 +48,7 @@ class EditIntegerPreference : EditTextPreference {
         val intValue: Int
         try {
             intValue = Integer.parseInt(value)
-        } catch (e: Exception) {
+        } catch (e: NumberFormatException) {
             Toast.makeText(context, R.string.pref_int_failed, Toast.LENGTH_LONG).show()
             return false
         }
@@ -57,9 +58,16 @@ class EditIntegerPreference : EditTextPreference {
     companion object {
         fun getAttr(context: Context): Int {
             val value = TypedValue()
-            context.theme.resolveAttribute(R.attr.editTextPreferenceStyle, value, true)
-            return if (value.resourceId != 0) R.attr.editTextPreferenceStyle
-            else android.R.attr.editTextPreferenceStyle
+            context.theme.resolveAttribute(
+                androidx.preference.R.attr.editTextPreferenceStyle,
+                value,
+                true,
+            )
+            return if (value.resourceId != 0) {
+                androidx.preference.R.attr.editTextPreferenceStyle
+            } else {
+                android.R.attr.editTextPreferenceStyle
+            }
         }
     }
 }

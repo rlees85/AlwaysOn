@@ -16,42 +16,49 @@ import androidx.recyclerview.widget.RecyclerView
 import io.github.domi04151309.alwayson.R
 
 class LayoutListAdapter(
-    private val context: Context,
     private val drawables: Array<Int>,
     private val titles: Array<String>,
-    private val onItemClickListener: OnItemClickListener
+    private val onItemClickListener: OnItemClickListener,
 ) : RecyclerView.Adapter<LayoutListAdapter.ViewHolder>() {
-
     private var selectedItem = -1
 
     interface OnItemClickListener {
-        fun onItemClick(view: View, position: Int)
+        fun onItemClick(position: Int)
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.layout_list_item, parent, false)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder =
+        ViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.layout_list_item, parent, false),
         )
-    }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.view.setOnClickListener {
             setSelectedItem(position)
-            onItemClickListener.onItemClick(holder.view, position)
+            onItemClickListener.onItemClick(position)
         }
 
-        if (position == selectedItem) holder.view.findViewById<LinearLayout>(R.id.linearLayout)
-            .setBackgroundColor(
-                ColorUtils.setAlphaComponent(getColor(context, R.color.colorAccent), 64)
-            )
-        else {
+        if (position == selectedItem) {
+            holder.view.findViewById<LinearLayout>(R.id.linearLayout)
+                .setBackgroundColor(
+                    ColorUtils.setAlphaComponent(
+                        getAccentColor(holder.view.context),
+                        SELECTED_BACKGROUND_ALPHA,
+                    ),
+                )
+        } else {
             holder.view.findViewById<LinearLayout>(R.id.linearLayout).background =
-                context.getAttr(R.attr.selectableItemBackground)
+                getSelectableItemBackground(holder.view.context)
         }
         holder.view.findViewById<ImageView>(R.id.drawable)
-            .setImageDrawable(ContextCompat.getDrawable(context, drawables[position]))
+            .setImageDrawable(ContextCompat.getDrawable(holder.view.context, drawables[position]))
         holder.view.findViewById<TextView>(R.id.title).text = titles[position]
     }
 
@@ -64,11 +71,27 @@ class LayoutListAdapter(
         notifyItemChanged(selectedItem)
     }
 
-    private fun Context.getAttr(
-        attr: Int,
-        typedValue: TypedValue = TypedValue()
-    ): Drawable? {
-        theme.resolveAttribute(attr, typedValue, true)
-        return ContextCompat.getDrawable(context, typedValue.resourceId)
+    private fun getSelectableItemBackground(context: Context): Drawable? {
+        val value = TypedValue()
+        context.theme.resolveAttribute(
+            androidx.appcompat.R.attr.selectableItemBackground,
+            value,
+            true,
+        )
+        return ContextCompat.getDrawable(context, value.resourceId)
+    }
+
+    private fun getAccentColor(context: Context): Int {
+        val value = TypedValue()
+        context.theme.resolveAttribute(
+            androidx.appcompat.R.attr.colorAccent,
+            value,
+            true,
+        )
+        return getColor(context, value.resourceId)
+    }
+
+    companion object {
+        private const val SELECTED_BACKGROUND_ALPHA = 64
     }
 }
