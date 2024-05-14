@@ -1,12 +1,8 @@
 package io.github.domi04151309.alwayson.services
 
 import android.app.Notification
-<<<<<<< HEAD
-import android.content.*
-import android.graphics.Color
-=======
 import android.content.Intent
->>>>>>> master
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
@@ -19,8 +15,8 @@ import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
 import io.github.domi04151309.alwayson.helpers.Rules
 import io.github.domi04151309.alwayson.receivers.CombinedServiceReceiver
-import org.json.JSONArray
 import kotlin.math.roundToInt
+import org.json.JSONArray
 
 class NotificationService : NotificationListenerService() {
     private var sentRecently: Boolean = false
@@ -64,7 +60,7 @@ class NotificationService : NotificationListenerService() {
         if (sentRecently) return
 
         sentRecently = true
-        try t {
+        try {
             val apps = ArrayList<String>(detailed.size)
             detailed = activeNotifications
             icons = ArrayList(detailed.size)
