@@ -17,8 +17,8 @@ android {
         minSdk = 24
         //noinspection EditedTargetSdkVersion
         targetSdk = 34
-        versionCode = 391
-        versionName = "3.9.1"
+        versionCode = 396
+        versionName = "3.9.1r5"
     }
 
     buildTypes {
