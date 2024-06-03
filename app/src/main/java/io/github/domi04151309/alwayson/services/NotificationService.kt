@@ -41,7 +41,8 @@ class NotificationService : NotificationListenerService() {
             !CombinedServiceReceiver.isScreenOn &&
             !CombinedServiceReceiver.isAlwaysOnRunning &&
             Rules.isAmbientMode(this) &&
-            rules.canShow(this)
+            rules.canShow(this) &&
+            count >= 1
         ) {
             startActivity(
                 Intent(
@@ -54,6 +55,14 @@ class NotificationService : NotificationListenerService() {
 
     override fun onNotificationRemoved(notification: StatusBarNotification) {
         updateValues()
+
+        if (
+            CombinedServiceReceiver.isAlwaysOnRunning &&
+            Rules.isAmbientMode(this) &&
+            count < 1
+        ) {
+            AlwaysOn.finish()
+        }
     }
 
     private fun updateValues() {
