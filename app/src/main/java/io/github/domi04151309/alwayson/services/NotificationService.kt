@@ -2,7 +2,6 @@ package io.github.domi04151309.alwayson.services
 
 import android.app.Notification
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
@@ -11,11 +10,11 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.preference.PreferenceManager
 import io.github.domi04151309.alwayson.actions.alwayson.AlwaysOn
+import io.github.domi04151309.alwayson.helpers.ColorHelper
 import io.github.domi04151309.alwayson.helpers.Global
 import io.github.domi04151309.alwayson.helpers.JSON
 import io.github.domi04151309.alwayson.helpers.Rules
 import io.github.domi04151309.alwayson.receivers.CombinedServiceReceiver
-import kotlin.math.roundToInt
 import org.json.JSONArray
 
 class NotificationService : NotificationListenerService() {
@@ -84,27 +83,10 @@ class NotificationService : NotificationListenerService() {
                 if (!apps.contains(notification.packageName)) {
                     apps += notification.packageName
 
-                    var color: Int = notification.notification.color
-
-                    val colorRed: Int = Color.red(color)
-                    val colorGreen: Int = Color.green(color)
-                    val colorBlue: Int = Color.blue(color)
-
-                    color = if ((colorRed < 1) && (colorGreen < 1) && (colorBlue < 1)) {
-                        Color.WHITE
-                    } else {
-                        val rgbMax: Int = maxOf(colorRed, colorGreen, colorBlue)
-                        val rgbFactor: Float = 255 / rgbMax.toFloat()
-                        val newRed: Int = minOf(255, (colorRed * rgbFactor).roundToInt())
-                        val newGreen: Int = minOf(255, (colorGreen * rgbFactor).roundToInt())
-                        val newBlue: Int = minOf(255, (colorBlue * rgbFactor).roundToInt())
-                        Color.rgb(newRed, newGreen, newBlue)
-                    }
-
                     icons.add(
                         Pair(
                             notification.notification.smallIcon,
-                            color,
+                            ColorHelper.boostColor(notification.notification.color),
                         ),
                     )
                 }
